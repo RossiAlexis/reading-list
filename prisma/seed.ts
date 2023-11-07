@@ -1,43 +1,58 @@
 import { PrismaClient } from "@prisma/client";
-import bcrypt from "bcryptjs";
+
+import books from "../books.json";
+
+const GenresArray = [
+  {
+    name: "Fantasy",
+  },
+  {
+    name: "Science Fiction",
+  },
+  {
+    name: "Horror",
+  },
+  {
+    name: "Thriller",
+  },
+];
 
 const prisma = new PrismaClient();
 
 async function seed() {
-  const email = "rachel@remix.run";
+  // GenresArray.forEach(async (data) => {
+  //   await prisma.genre.create({
+  //     data,
+  //   });
+  // });
 
-  // cleanup the existing database
-  await prisma.user.delete({ where: { email } }).catch(() => {
-    // no worries if it doesn't exist yet
-  });
-
-  const hashedPassword = await bcrypt.hash("racheliscool", 10);
-
-  const user = await prisma.user.create({
-    data: {
-      email,
-      password: {
-        create: {
-          hash: hashedPassword,
-        },
+  books.library.forEach(async (book) => {
+    const authorId = await prisma.author.create({
+      data: {
+        name: book.book.author.name,
       },
-    },
-  });
+    });
 
-  await prisma.note.create({
-    data: {
-      title: "My first note",
-      body: "Hello, world!",
-      userId: user.id,
-    },
-  });
-
-  await prisma.note.create({
-    data: {
-      title: "My second note",
-      body: "Hello, world!",
-      userId: user.id,
-    },
+    // const authorId = await prisma.author.findFirst({
+    //   where: {
+    //     name: book.book.author.name,
+    //   },
+    // });
+    try {
+      await prisma.book.create({
+        data: {
+          title: book.book.title,
+          authorId: authorId.id,
+          cover: book.book.cover,
+          ISBN: book.book.ISBN,
+          synopsis: book.book.synopsis,
+          pages: book.book.pages,
+          genreId: book.book.genreId,
+        },
+      });
+    } catch (error) {
+      console.log("HOLA", book.book.title, error);
+    }
   });
 
   console.log(`Database has been seeded. 🌱`);

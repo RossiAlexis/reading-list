@@ -7,32 +7,31 @@ generator client {
   provider = "prisma-client-js"
 }
 
-model User {
-  id    String @id @default(cuid())
-  email String @unique
+model Author {
+  id   String @id @default(cuid())
+  name String
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  password Password?
-  notes    Note[]
+  books Book[]
 }
 
-model Password {
-  hash String
-
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  userId String @unique
-}
-
-model Note {
+model Genre {
   id    String @id @default(cuid())
-  title String
-  body  String
+  name  String
+  books Book[]
+}
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  userId String
+model Book {
+  id       String @id @default(cuid())
+  title    String
+  ISBN     String
+  pages    Int
+  cover    String
+  synopsis String
+  author   Author @relation(fields: [authorId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  authorId String 
+  genre    Genre  @relation(fields: [genreId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  genreId  String 
 }
